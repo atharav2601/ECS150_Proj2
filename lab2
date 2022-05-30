@@ -1,0 +1,102 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <unistd.h>
+#include <string.h>
+
+struct char name_process[][];
+time_process
+probability
+
+int main(int argc, char **argv)
+{
+    File* file1;
+    char c;
+
+    //char *input = argv[1];
+
+
+    file1 = fopen(argv[1], "r");
+    int i=0,j=0,k=0;
+    if (file1 == 0)
+    {
+        //fopen returns 0, the NULL pointer, on failure
+        perror("Cannot open input file\n");
+        exit(-1);
+    }
+    else
+    {
+        while ((c =fgetc(file1)) != EOF )
+        {
+            while(!isspace(c))
+            {
+                if(k==0)   //name of the process is inputted
+                {
+                    while(1)
+                    {
+                        if(isalpha(c))
+                        {
+                            name_process[i][j]=c;
+                            j=j+1;
+                            if(j>10)
+                            {
+                                //error
+                            }
+                        }
+                        else
+                        {
+                            break;
+                        }
+                        c = fgetc(file1);
+                    }
+                    j=0;
+                    k=k+1;
+                }
+                else if(k==1) 
+                {
+                    while(1)
+                    {
+                        if(isdigit(c))
+                        {
+                            time_processes[i]=time_processes[i]*10+(c-'0')
+                        }
+                        else if(isspace(c))
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            //check error
+                        }
+                        c = fgetc(file1);
+                    }
+                    k=k+1;
+                }
+                else
+                {
+                    while(1)
+                    {
+                        if(!isspace(c))
+                        {
+                            probability_string[i][j]=c
+                            j=j+1;
+                        }
+                        else 
+                        {
+                            break;
+                        }
+                        c = fgetc(file1);
+                    }
+                    j=0;
+                    k=0;
+                    i=i+1;
+                }
+            }
+        }
+        fclose(file1);
+        //convert probablity string to float
+
+    }
+}
