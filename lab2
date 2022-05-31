@@ -6,20 +6,45 @@
 #include <unistd.h>
 #include <string.h>
 
-struct char name_process[][];
-time_process
-probability
-
 int main(int argc, char **argv)
 {
-    File* file1;
+    FILE *file1, *file_count;
     char c;
-
+    int num = 0;
     //char *input = argv[1];
 
-
-    file1 = fopen(argv[1], "r");
+    file_count=fopen(argv[2],"r");
+    if (file_count == 0)
+    {
+        //fopen returns 0, the NULL pointer, on failure
+        perror("Cannot open input file\n");
+        exit(-1);
+    }
+    else
+    {
+        while((c=fgetc(file_count)) != EOF)
+        {
+            while((c=fgetc(file_count)) != '\n')
+            {
+                continue;
+            }
+            num=num+1;
+        }
+    }
+    fclose(file_count);
+    char name_process [num][10];//process name array to store process names
+    int name_index = 0;
+    int time_process [num];//runtime array
+    char probability_string [num][4];//probability to block array, "0.xx" is 4 characters
+    float probability[num];
     int i=0,j=0,k=0;
+    //initialize time_process to 0
+    for(i=0;i<num;i++)
+    {
+        time_process[i]=0;
+    }
+    file1 = fopen(argv[2], "r");
+
     if (file1 == 0)
     {
         //fopen returns 0, the NULL pointer, on failure
@@ -60,7 +85,7 @@ int main(int argc, char **argv)
                     {
                         if(isdigit(c))
                         {
-                            time_processes[i]=time_processes[i]*10+(c-'0')
+                            time_process[i]=time_process[i]*10+(c-'0');
                         }
                         else if(isspace(c))
                         {
@@ -80,7 +105,7 @@ int main(int argc, char **argv)
                     {
                         if(!isspace(c))
                         {
-                            probability_string[i][j]=c
+                            probability_string[i][j]=c;
                             j=j+1;
                         }
                         else 
@@ -88,15 +113,76 @@ int main(int argc, char **argv)
                             break;
                         }
                         c = fgetc(file1);
+                        i=i+1;
                     }
                     j=0;
                     k=0;
-                    i=i+1;
+                    i=0;
                 }
             }
         }
         fclose(file1);
-        //convert probablity string to float
+        //convert probability string to float
+        for(i=0;i<num;i++)
+        {
+            probability[i]= atoi(strcat(probability_string[i][2],probability_string[i][3])); //if 0.87, will give 87
+            probability[i]=(probability[i]/100.0);
+        }
+    }
+    int track = 0;
+    float random=0.00;
+    char input='f';
+
+    //variables for processes
+    int runtime[num]; //runtime for different processes 
+    int blocktime[num]; // block time for different processes
+    int dispatches[num];//number of disptaches per process
+    int time_completed[num]; // time when the process is completed
+    int blocked_counter[num]; // number of times the process was blocked by IO
+
+    //variables for system 
+    int system_clock_time = 0;
+
+    //variables for CPU and IO 
+    int CPU_runtime=0, CPU_idle_time=0, IO_runtime=0, IO_idle_time=0; 
+    
+    //take input from user and store in in char input
+    while(1)
+    {
+        if((time_process[track]-runtime[track])>=2) //time remaining of the process is greater than 2
+        {
+            //generate random number and store it in random
+            if(random > probability[track])
+            {
+                runtime[track]=runtime[track]+CPU_function((time_process[track]-runtime[track]),input);
+            }
+            else
+            {
+                //generate random number between 1 and (time_processes[track]-runtime[track]) and store it in random 
+                //fork
+                runtime[track]=runtime[track]+CPU_function(random, input);
+                blocktime[track]=IOTime(time_process[track]-runtime[track]);
+            }
+        }  
+        else
+        {
+            runtime[track]=CPU_function(time_process[track],input);
+        }  
+    }
+
+}
+
+
+int CPU_function(int time, char type)     //type is for FCFS or RR
+{
+    int runtime=0;
+    if(type=='f')
+    {  
+        runtime=time;
+    }
+    if(type =='r')
+    {
 
     }
+    return time;
 }
