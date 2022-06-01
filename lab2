@@ -165,7 +165,7 @@ int main(int argc, char **argv)
 
 
 
-    while(1)
+    while(1) //check if length of completed queue is equal to num 
     {
         while(1)  //to check if first process needs to be blocked or not 
         {
@@ -181,7 +181,6 @@ int main(int argc, char **argv)
             if(block==1)
             {
                 //append value from ready queue into IO queue over here
-                
                 //pop the ready queue value over here
             }
             else
@@ -189,8 +188,7 @@ int main(int argc, char **argv)
                 //append value of ready queue in CPU queue
                 //pop value from ready queue
                 break;
-            }
-            
+            }    
         }
         //check if IO and CPU queue has values, if they both do
         {
@@ -201,35 +199,71 @@ int main(int argc, char **argv)
             if(runtime[run_now_cpu]==time_process[run_now_cpu]-1)
             {
                 time_completed[run_now_cpu]=system_clock_time;
+                //append the first value of the cpu queue to the completed queue
                 //remove the first value of the CPU queue over here
             }
             else
             {
                 runtime[run_now_cpu]=runtime[run_now_cpu]+1;
-                block_time[run_now_IO]=runtime[run_now_IO]+1;
-                //need to tackle block time issue here(how to decide how much time to block io for)
+            }
+            if(check_block[run_now_IO]==0) //not blocked 
+            {
+                if(block_time[run_now_IO]!=0) //had been blocked but not blocked anymore
+                {
+                    //append item from IO queue to ready queue 
+                    //pop the item from the IO queue
+                }
+                else                          //was not blocked  
+                {
+                    check_block[run_now_IO]=0;//generate random number between 1 and 30 
+                }
+            }
+            else
+            {
+                check_block[run_now_IO]=check_block[run_now_IO]-1;
+                block_time[run_now_IO]=block_time[run_now_IO]+1;
             }
         }
         //only CPU queue has value 
         {
             CPU_runtime=CPU_runtime+1;
+            IO_idle_time=IO_idle_time+1;
             run_now_cpu=0;// get CPU queue's first value here
             if(runtime[run_now_cpu]==time_process[run_now_cpu]-1)
             {
                 time_completed[run_now_cpu]=system_clock_time;
+                //append the first value of the cpu queue to the completed queue
                 //remove the first value of the CPU queue over here
             }
-            IO_idle_time=IO_idle_time+1;
+            else
+            {
+                runtime[run_now_cpu]=runtime[run_now_cpu]+1;
+            }
+
         }
         //only IO queue has value
         {
             IO_runtime=IO_runtime+1;
-            run_now_IO=0;//get IO queue's first value here 
-            //get the amount of time the process needs to be blocked
+            CPU_idle_time=CPU_idle_time+1;
+            if(check_block[run_now_IO]==0) //not blocked 
+            {
+                if(block_time[run_now_IO]!=0) //had been blocked but not blocked anymore
+                {
+                    
+                }
+                else                          //was not blocked  
+                {
+                    check_block[run_now_IO]=0;//generate random number between 1 and 30 
+                }
+            }
+            else
+            {
+                check_block[run_now_IO]=check_block[run_now_IO]-1;
+                block_time[run_now_IO]=block_time[run_now_IO]+1;
+            }
         }
-
+        system_clock_time=system_clock_time+1;
     }
-
 }
 
 
