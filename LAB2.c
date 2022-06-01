@@ -30,3 +30,43 @@ int main(int argc, string argv[])
    
 
 }
+
+struct Node
+{
+  int data; //using number to represent the file name, this is also the index number to all record arrays
+  struct Node *next;
+};
+ 
+
+void append(struct Node** head, int newData)//to initialzie the ready queue, use for loop to add the process number one by one
+{
+   
+    struct Node* newNode = (struct Node*) malloc(sizeof(struct Node));
+    struct Node *current = *head;  
+    newNode->data  = newData;//assign to the end of ready queue
+ 
+    newNode->next = NULL;//if ready queue is empty, the head node is the new node
+    if (*head == NULL)
+    {
+       *head = newNode;
+       return;
+    }
+ 
+    while (current->next != NULL)//go to the end of item and connect it to the new node 
+        current = current->next;
+    current->next = newNode;
+    return;
+}
+
+void pop(struct node **head) {
+  struct node *tmp;
+
+  /*Linked list does not exist or the list is empty*/
+  if(*head == NULL) {
+      return;
+  } 
+  
+  tmp = *head;
+  *head = (*head)->next;//move head to next
+  free(tmp);//remove first item
+}
