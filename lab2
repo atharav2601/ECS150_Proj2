@@ -135,7 +135,7 @@ int main(int argc, char **argv)
 
     //variables for processes
     int runtime[num]; //runtime for different processes 
-    int blocktime[num]; // block time for different processes
+    int block_time[num]; // block time for different processes
     int dispatches[num];//number of disptaches per process
     int time_completed[num]; // time when the process is completed
     int blocked_counter[num]; // number of times the process was blocked by IO
@@ -145,29 +145,89 @@ int main(int argc, char **argv)
 
     //variables for CPU and IO 
     int CPU_runtime=0, CPU_idle_time=0, IO_runtime=0, IO_idle_time=0; 
-    
+
+    //other variables
+    int run_now=0,run_now_cpu=0,run_now_IO=0;
+    int check_block[num];  // check if the process needs to remain blocked or not
+    int block=0; 
+    //initialize CPU and IO queue here
     //take input from user and store in in char input
+
+    for(i=0;i<num;i++)
+    {
+        runtime[num]=0;
+        block_time[num]=0;
+        dispatches[num]=0;
+        time_completed[num]=0;
+        blocked_counter[num]=0;
+        check_block[num]=0;
+    }
+
+
+
     while(1)
     {
-        if((time_process[track]-runtime[track])>=2) //time remaining of the process is greater than 2
+        while(1)  //to check if first process needs to be blocked or not 
         {
-            //generate random number and store it in random
-            if(random > probability[track])
+            //check if ready queue has values in it
             {
-                runtime[track]=runtime[track]+CPU_function((time_process[track]-runtime[track]),input);
+                run_now=0;//put the ready queue value over here
+                block = Check_if_blocked(run_now, probability[run_now], time_process[run_now]);
+            }
+            //else
+            {
+                break;
+            }
+            if(block==1)
+            {
+                //append value from ready queue into IO queue over here
+                
+                //pop the ready queue value over here
             }
             else
             {
-                //generate random number between 1 and (time_processes[track]-runtime[track]) and store it in random 
-                //fork
-                runtime[track]=runtime[track]+CPU_function(random, input);
-                blocktime[track]=IOTime(time_process[track]-runtime[track]);
+                //append value of ready queue in CPU queue
+                //pop value from ready queue
+                break;
             }
-        }  
-        else
+            
+        }
+        //check if IO and CPU queue has values, if they both do
         {
-            runtime[track]=CPU_function(time_process[track],input);
-        }  
+            run_now_cpu=0;//get first index value in cpu queue here
+            run_now_IO=0;//get first index value of IO queue here
+            CPU_runtime=CPU_runtime+1;
+            IO_runtime=IO_runtime+1;
+            if(runtime[run_now_cpu]==time_process[run_now_cpu]-1)
+            {
+                time_completed[run_now_cpu]=system_clock_time;
+                //remove the first value of the CPU queue over here
+            }
+            else
+            {
+                runtime[run_now_cpu]=runtime[run_now_cpu]+1;
+                block_time[run_now_IO]=runtime[run_now_IO]+1;
+                //need to tackle block time issue here(how to decide how much time to block io for)
+            }
+        }
+        //only CPU queue has value 
+        {
+            CPU_runtime=CPU_runtime+1;
+            run_now_cpu=0;// get CPU queue's first value here
+            if(runtime[run_now_cpu]==time_process[run_now_cpu]-1)
+            {
+                time_completed[run_now_cpu]=system_clock_time;
+                //remove the first value of the CPU queue over here
+            }
+            IO_idle_time=IO_idle_time+1;
+        }
+        //only IO queue has value
+        {
+            IO_runtime=IO_runtime+1;
+            run_now_IO=0;//get IO queue's first value here 
+            //get the amount of time the process needs to be blocked
+        }
+
     }
 
 }
@@ -185,4 +245,19 @@ int CPU_function(int time, char type)     //type is for FCFS or RR
 
     }
     return time;
+}
+
+
+int Check_if_blocked(int n, float p, int t)
+{
+    int random;
+    random=0;//generate random number here 
+    if(t>2)
+    {
+        if(random<p)
+        {
+            return 1;//return true
+        }
+    }
+    return 0;//return false
 }
