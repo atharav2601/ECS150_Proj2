@@ -6,6 +6,21 @@
 #include <unistd.h>
 #include <string.h>
 
+
+int Check_if_blocked(float p, int t)
+{
+    int random;
+    random=0;//generate random number here between 0 and 1 
+    if(t>2)
+    {
+        if(random<p)
+        {
+            return 1;//return true
+        }
+    }
+    return 0;//return false
+}
+
 int main(int argc, char **argv)
 {
     FILE *file1, *file_count;
@@ -38,6 +53,7 @@ int main(int argc, char **argv)
     char probability_string [num][4];//probability to block array, "0.xx" is 4 characters
     float probability[num];
     int i=0,j=0,k=0;
+    int error=0;
     //initialize time_process to 0
     for(i=0;i<num;i++)
     {
@@ -61,13 +77,15 @@ int main(int argc, char **argv)
                 {
                     while(1)
                     {
-                        if(isalpha(c))
+                        if(isalpha(c) || isdigit(c))
                         {
                             name_process[i][j]=c;
                             j=j+1;
                             if(j>10)
                             {
-                                //error
+                                //error = 1
+                                //store the error name using perror
+                                //exit(-1)
                             }
                         }
                         else
@@ -93,7 +111,9 @@ int main(int argc, char **argv)
                         }
                         else
                         {
-                            //check error
+                            //error = 1
+                            //store the error name using perror
+                            //exit(-1)
                         }
                         c = fgetc(file1);
                     }
@@ -114,6 +134,12 @@ int main(int argc, char **argv)
                         }
                         c = fgetc(file1);
                         i=i+1;
+                        if(j>=4) //probability should be 4 char, one 0 one "." and two digits
+                        {
+                            //error = 1
+                            //store the error name using perror
+                            //exit(-1)
+                        }
                     }
                     j=0;
                     k=0;
@@ -136,7 +162,7 @@ int main(int argc, char **argv)
     //variables for processes
     int runtime[num]; //runtime for different processes 
     int block_time[num]; // block time for different processes
-    int dispatches[num];//number of disptaches per process
+    int dispatches[num];//number of times process was given cpu
     int time_completed[num]; // time when the process is completed
     int blocked_counter[num]; // number of times the process was blocked by IO
 
@@ -150,8 +176,8 @@ int main(int argc, char **argv)
     int run_now=0,run_now_cpu=0,run_now_IO=0;
     int check_block[num];  // check if the process needs to remain blocked or not
     int check_run[num];//if a process needs to run or not
-    int block[track];
-    int preblock_run[track];
+    int block[num];
+    int preblock_run[num];
     //initialize ready queue
     //take input from user and store in in char input
 
@@ -170,13 +196,13 @@ int main(int argc, char **argv)
 
 
 
-    while(1) //check if length of completed queue is equal to num 
+    while(error==0) // and check if length of completed queue is equal to num 
     {
-        while(1) //check if ready queues has any value 
+        if(1) //check if ready queues has any value 
         {
             if(input=='f')
             {
-                track=0;//first value of the ready list
+                track=0;//first value of the ready list   add if condition 
                 //append track value to the cpu list
                 //pop value from the ready list
                 if(preblock_run[track]==0)
@@ -187,20 +213,31 @@ int main(int argc, char **argv)
                 {
                     if(preblock_run[track]==0 && check_run[track]==0)        
                     {
-                        random=0;//generate random number from 1 to time remaining of process
-                        check_run[track]=random;
-                        preblock_run[track]=1;
+                        random=0;//generate random number from 1 to (time_process[track]-runtime[track]) for time to run before block
+                        if(time_process[track]-random>0)  //to check that random number generated is not equal to the time process
+                        {
+                            check_run[track]=random;
+                            preblock_run[track]=1;
+                            dispatches[track]=dispatches[track]+1;
+                        }
+                        else //if random number generated is equal to the process time 
+                        {
+                            block[track]=0;
+                        }
                     }
                     else if(check_run[track]==0)
                     {
-                        //append track value to IO queue
-                        //pop first value of CPU queue
+                        //append track value from cpu queue to IO queue
+                        //pop first value of cpu queue
+                        blocked_counter[track]=blocked_counter[track]+1;
+                        preblock_run[track] = 0; //resetting the value in case the process gets blocked again
                         break;
                     }
                 }
                 else    //not blocked
                 {
-                    check_run[track]=time_process[track];
+                    check_run[track]=time_process[track]-runtime[track];
+                    preblock_run[track]=1;
                 }
             }
             else if(input == 'r')
@@ -225,6 +262,11 @@ int main(int argc, char **argv)
             {
                 runtime[run_now_cpu]=runtime[run_now_cpu]+1;
                 check_run[run_now_cpu]=check_run[run_now_cpu]-1;
+                if(check_run[run_now_cpu]==0)
+                {
+                    //append from cpu queue to ready queue
+                    //pop from cpu queue
+                }
             }
             if(check_block[run_now_IO]==0) //not blocked 
             {
@@ -232,6 +274,8 @@ int main(int argc, char **argv)
                 {
                     //append item from IO queue to ready queue 
                     //pop the item from the IO queue
+                    dispatches[run_now_IO]=dispatches[run_now_IO]+1;   //passed from io to cpu
+                    block[run_now_IO]=0;//process not blocked anymore
                 }
                 else                          //was not blocked  
                 {
@@ -259,8 +303,12 @@ int main(int argc, char **argv)
             {
                 runtime[run_now_cpu]=runtime[run_now_cpu]+1;
                 check_run[run_now_cpu]=check_run[run_now_cpu]-1;
+                if(check_run[run_now_cpu]==0)
+                {
+                    //append from cpu queue to ready queue
+                    //pop from cpu queue
+                }
             }
-
         }
         //only IO queue has value
         {
@@ -272,10 +320,12 @@ int main(int argc, char **argv)
                 {
                     //append item from IO queue to ready queue 
                     //pop the item from the IO queue
+                    dispatches[run_now_IO]=dispatches[run_now_IO]+1; //passed from io to cpu
+                    block[run_now_IO]=0; //process not blocked anymore
                 }
                 else                          //was not blocked  
                 {
-                    check_block[run_now_IO]=0;//generate random number between 1 and 30 
+                    check_block[run_now_IO]=2;//generate random number between 1 and 30 
                 }
             }
             else
@@ -304,19 +354,6 @@ int CPU_function(int time, char type)     //type is for FCFS or RR
 }
 
 
-int Check_if_blocked(float p, int t)
-{
-    int random;
-    random=0;//generate random number here between 0 and 1 
-    if(t>2)
-    {
-        if(random<p)
-        {
-            return 1;//return true
-        }
-    }
-    return 0;//return false
-}
 
 
 
@@ -328,7 +365,7 @@ int Check_if_blocked(float p, int t)
 
 //extra code
 
-//check if ready queue has values in it
+/*check if ready queue has values in it
             {
                 run_now=0;//put the ready queue value over here
                 block = Check_if_blocked(run_now, probability[run_now], time_process[run_now]);
@@ -348,3 +385,4 @@ int Check_if_blocked(float p, int t)
                 //pop value from ready queue
                 break;
             }  
+*/
