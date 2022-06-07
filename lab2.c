@@ -23,6 +23,7 @@ int Check_if_blocked(float p, int t)
 
 int main(int argc, char **argv)
 {
+    (void) srandom(12345);
     FILE *file1, *file_count;
     char c;
     int num = 0;
@@ -54,6 +55,7 @@ int main(int argc, char **argv)
     float probability[num];
     int i=0,j=0,k=0;
     int error=0;
+    int high=30,low=1;
     //initialize time_process to 0
     for(i=0;i<num;i++)
     {
@@ -214,7 +216,7 @@ int main(int argc, char **argv)
                 {
                     if(preblock_run[track]==0 && check_run[track]==0)        
                     {
-                        random=0;//generate random number from 1 to (time_process[track]-runtime[track]) for time to run before block
+                        random=(rand() % (high - low + 1)) + low;//generate random number from 1 to (time_process[track]-runtime[track]) for time to run before block
                         if(time_process[track]-random>0)  //to check that random number generated is not equal to the time process
                         {
                             check_run[track]=random;
@@ -254,7 +256,7 @@ int main(int argc, char **argv)
                 {
                     if(preblock_run[track]==0 && check_run[track]==0)        
                     {
-                        random=0;//generate random number from 1 to 5 or (time_process[track]-runtime[track]) if time remaining less than 5  - for time to run before block
+                        random=(rand() % 5) + low;//generate random number from 1 to 5 or (time_process[track]-runtime[track]) if time remaining less than 5  - for time to run before block
                         if(time_process[track]-random>0)  //to check that random number generated is not equal to the time process
                         {
                             check_run[track]=random;
@@ -384,19 +386,6 @@ int main(int argc, char **argv)
 }
 
 
-int CPU_function(int time, char type)     //type is for FCFS or RR
-{
-    int runtime=0;
-    if(type=='f')
-    {  
-        runtime=time;
-    }
-    if(type =='r')
-    {
-
-    }
-    return time;
-}
 
 
 
