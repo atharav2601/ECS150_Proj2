@@ -10,7 +10,8 @@
 int Check_if_blocked(float p, int t)
 {
     int random;
-    random=0;//generate random number here between 0 and 1 
+    int high =1, low =0;
+    random=(rand() % (high - low + 1)) + low;
     if(t>2)
     {
         if(random<p)
@@ -153,8 +154,11 @@ int main(int argc, char **argv)
         //convert probability string to float
         for(i=0;i<num;i++)
         {
-            probability[i]= atoi(strcat(probability_string[i][2],probability_string[i][3])); //if 0.87, will give 87
-            probability[i]=(probability[i]/100.0);
+            if(probability_string[i][0]=='0' && probability_string[i][1]=='.')//also check if position 2 and 3 are digits 
+            {
+                probability[i]= atoi(strcat(probability_string[i][2],probability_string[i][3])); //if 0.87, will give 87
+                probability[i]=(probability[i]/100.0);
+            }
         }
     }
     int track = 0;
@@ -197,8 +201,6 @@ int main(int argc, char **argv)
         preblock_run[num]=0;
     }
 
-
-
     while(error==0) // and check if length of completed queue is equal to num 
     {
         if(1) //check if ready queues has any value 
@@ -216,6 +218,7 @@ int main(int argc, char **argv)
                 {
                     if(preblock_run[track]==0 && check_run[track]==0)        
                     {
+                        high=time_process[track]-runtime[track];
                         random=(rand() % (high - low + 1)) + low;//generate random number from 1 to (time_process[track]-runtime[track]) for time to run before block
                         if(time_process[track]-random>0)  //to check that random number generated is not equal to the time process
                         {
