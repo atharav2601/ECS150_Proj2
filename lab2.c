@@ -178,6 +178,7 @@ int main(int argc, char **argv)
     int check_run[num];//if a process needs to run or not
     int block[num];
     int preblock_run[num];
+    int quantum = 0; //keep track of quantum in loop 
     //initialize ready queue
     //take input from user and store in in char input
 
@@ -202,7 +203,7 @@ int main(int argc, char **argv)
         {
             if(input=='f')
             {
-                track=0;//first value of the ready list   add if condition 
+                track=0;//first value of the ready list add if condition 
                 //append track value to the cpu list
                 //pop value from the ready list
                 if(preblock_run[track]==0)
@@ -242,7 +243,50 @@ int main(int argc, char **argv)
             }
             else if(input == 'r')
             {
-                
+                track=0;//first value of the ready list add if condition 
+                //append track value to the cpu list
+                //pop value from the ready list
+                if(preblock_run[track]==0)
+                {
+                    block[track]=Check_if_blocked(probability[track],(time_process[track]-runtime[track]));
+                }
+                if(block[track]==1) //blocked
+                {
+                    if(preblock_run[track]==0 && check_run[track]==0)        
+                    {
+                        random=0;//generate random number from 1 to 5 or (time_process[track]-runtime[track]) if time remaining less than 5  - for time to run before block
+                        if(time_process[track]-random>0)  //to check that random number generated is not equal to the time process
+                        {
+                            check_run[track]=random;
+                            preblock_run[track]=1;
+                            dispatches[track]=dispatches[track]+1;
+                        }
+                        else //if random number generated is equal to the process time 
+                        {
+                            block[track]=0;
+                        }
+                    }
+                    else if(check_run[track]==0)
+                    {
+                        //append track value from cpu queue to IO queue
+                        //pop first value of cpu queue
+                        blocked_counter[track]=blocked_counter[track]+1;
+                        preblock_run[track] = 0; //resetting the value in case the process gets blocked again
+                        break;
+                    }
+                }
+                else   //not blocked and has no more time to run left
+                {
+                    if(time_process[track]-runtime[track]<=5)
+                    {
+                        check_run[track]=time_process[track]-runtime[track];
+                    }
+                    else
+                    {
+                        check_run[track]=5;
+                    }
+                    preblock_run[track]=1;
+                }
             }
               
         }
@@ -335,6 +379,7 @@ int main(int argc, char **argv)
             }
         }
         system_clock_time=system_clock_time+1;
+        quantum=quantum+1;
     }
 }
 
