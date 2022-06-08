@@ -229,8 +229,8 @@ int main(int argc, char **argv)
                             break;
                         }
                         c = fgetc(file1);
-                        i=i+1;
-                        if(j>=4) //probability should be 4 char, one 0 one "." and two digits
+                        
+                        if(j>4) //probability should be 4 char, one 0 one "." and two digits
                         {
                             //error = 1
                             //store the error name using perror
@@ -239,7 +239,7 @@ int main(int argc, char **argv)
                     }
                     j=0;
                     k=0;
-                    i=0;
+                    i+=1;
                 }
             }
 
@@ -275,7 +275,7 @@ int main(int argc, char **argv)
     int system_clock_time = 0;
 
     //variables for CPU and IO 
-    int CPU_runtime=0, CPU_idle_time=0, IO_runtime=0, IO_idle_time=0; 
+    int CPU_runtime=0, CPU_idle_time=0, CPU_dispatch=0, IO_runtime=0, IO_idle_time=0 , IO_dispatch=0; 
 
     //other variables
     int run_now=0,run_now_cpu=0,run_now_IO=0;
@@ -306,7 +306,7 @@ int main(int argc, char **argv)
         {
             if(input=='f')
             {
-                track=0;//first value of the ready list add if condition 
+                track=0;//first value of the ready list 
                 //append track value to the cpu list
                 popR(&headR);//pop value from the ready list
                 if(preblock_run[track]==0)
@@ -507,7 +507,7 @@ int main(int argc, char **argv)
     printf("Total time spent idle: %d\n",CPU_idle_time);
     float utCPU=CPU_runtime/system_clock_time;//nn.nn
     printf("CPU utilization:%f\n",utCPU);
-    printf("Number of dispatches:%d\n",)//CPU dispatchname??
+    printf("Number of dispatches:%d\n",CPU_dispatch)//CPU dispatchname??
     float thCPU= //Overall throughput = number of processes / total time
     printf("Overall throughput:%d\n",)//need value
     
@@ -516,9 +516,9 @@ int main(int argc, char **argv)
     printf("I/O device:\n");
     printf("Total time spent busy: %d\n",IO_runtime);
     printf("Total time spent idle: %d\n",IO_idle_time);
-    float utIO=IO_runtime/system_clock_time;//nn.nn
+    float utIO=(IO_runtime(float))/system_clock_time;//nn.nn
     printf("I/O device utilization: %f\n",utIO);
-    printf("Number of dispatches:%d\n",)//CPU dispatchname??
+    printf("Number of dispatches:%d\n",IO_dispatch)//CPU dispatchname??
     float thIO= //Overall throughput = number of processes / total time
     printf("Overall throughput:%d\n",)//need value
     //utCPU, utIO, thCPU,thIO all are float nn.nn
