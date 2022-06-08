@@ -13,9 +13,14 @@ struct Readyqueue
 };
 struct IOqueue
 {
-  int dataIO; //using number to represent the file name, this is also the index number to all record arrays
+  int dataIO; 
   struct IOqueue *next;
 };
+struct CPUlist
+{
+  int dataC; 
+  struct CPUlist *next;
+}
 
  
 
@@ -51,6 +56,40 @@ void popR(struct Readyqueue **head) { //Readyqueue pop
   *head = (*head)->next;//move head to next
   free(tmp);//remove first item
 }
+
+void appendC(struct CPUlist** head, int newData)//
+{
+   
+    struct CPUlist* newNodeC = (struct CPUlist*) malloc(sizeof(struct CPUlist));
+    struct CPUlist *currentC = *head;  
+    newNodeC->dataC  = newData;//assign to the end of CPU queue
+ 
+    newNodeC->next = NULL;//if CPU queue is empty, the head node is the new node
+    if (*head == NULL)
+    {
+       *head = newNodeC;
+       return;
+    }
+ 
+    while (currentC->next != NULL)//go to the end of item and connect it to the new node 
+        currentC = currentC->next;
+    currentC->next = newNodeC;
+    return;
+}
+
+void popC(struct CPUlist**head) { //CPUqueue pop
+  struct CPUlist *tmp;
+
+  //Linked list does not exist or the list is empty
+  if(*head == NULL) {
+      return;
+  } 
+  
+  tmp = *head;
+  *head = (*head)->next;//move head to next
+  free(tmp);//remove first item
+}
+
 
 void appendIO(struct IOqueue** head, int newData)//IOqueue, it is empty initially
 {
@@ -115,6 +154,7 @@ int main(int argc, char **argv)
 
     struct Readyqueue* headR = NULL;
     struct IOqueue* headIO = NULL;
+    struct CPUlist* headC = NULL;
 
 
     (void) srandom(12345);
@@ -245,7 +285,7 @@ int main(int argc, char **argv)
 
 
         }
-        for( int v =0;v<i;v++)//i should be the total number of files, the link list for Readyqueue here will record the files in form of interger
+        for( int v =0; v<num; v++)//i should be the total number of files, the link list for Readyqueue here will record the files in form of interger
         {
           appendR(&headR,v);
         }
@@ -306,8 +346,8 @@ int main(int argc, char **argv)
         {
             if(input=='f')
             {
-                track=0;//first value of the ready list 
-                //append track value to the cpu list
+                track=headR->dataR;//first value of the ready list 
+                appendC(&headR,track);//append track value to the cpu list
                 popR(&headR);//pop value from the ready list
                 if(preblock_run[track]==0)
                 {
@@ -333,7 +373,7 @@ int main(int argc, char **argv)
                     else if(check_run[track]==0)
                     {
                         appendIO(&headIO,track)//append track value from cpu queue to IO queue
-                        //pop first value of cpu queue
+                        popC(&headC);//pop first value of cpu queue
                         blocked_counter[track]=blocked_counter[track]+1;
                         preblock_run[track] = 0; //resetting the value in case the process gets blocked again
                         break;
@@ -347,8 +387,8 @@ int main(int argc, char **argv)
             }
             else if(input == 'r')
             {
-                track=0;//first value of the ready list add if condition 
-                //append track value to the cpu list
+                track=headR->dataR;//first value of the ready list add if condition 
+                appendC(&headC,track);//append track value to the cpu list
                 popR(&headR);//pop value from the ready list
                 if(preblock_run[track]==0)
                 {
@@ -372,8 +412,8 @@ int main(int argc, char **argv)
                     }
                     else if(check_run[track]==0)
                     {
-                        appendIO(headIO,track);//append track value from cpu queue to IO queue
-                        //pop first value of cpu queue
+                        appendIO(&headIO,track);//append track value from cpu queue to IO queue
+                        popC(&headC);//pop first value of cpu queue
                         blocked_counter[track]=blocked_counter[track]+1;
                         preblock_run[track] = 0; //resetting the value in case the process gets blocked again
                         break;
@@ -396,15 +436,15 @@ int main(int argc, char **argv)
         }
         //check if IO and CPU queue has values, if they both do
         {
-            run_now_cpu=0;//get first index value in cpu queue here
-            run_now_IO=0;//get first index value of IO queue here
+            run_now_cpu=headC->dataC;//get first index value in cpu queue here
+            run_now_IO=headIO->dataIO;//get first index value of IO queue here
             CPU_runtime=CPU_runtime+1;
             IO_runtime=IO_runtime+1;
             if(runtime[run_now_cpu]==time_process[run_now_cpu]-1)
             {
                 time_completed[run_now_cpu]=system_clock_time;
                 //append the first value of the cpu queue to the completed queue
-                popR(&headR);//remove the first value of the CPU queue over here using pop
+                popC(&headC);//remove the first value of the CPU queue over here using pop
             }
             else
             {
@@ -412,8 +452,8 @@ int main(int argc, char **argv)
                 check_run[run_now_cpu]=check_run[run_now_cpu]-1;
                 if(check_run[run_now_cpu]==0)
                 {
-                    //append from cpu queue to ready queue ???
-                    //pop from cpu queue ???
+                    appendR(&headR,headC->dataC);//append from cpu queue to ready queue 
+                    popC(&headC);//pop from cpu queue 
                 }
             }
             if(check_block[run_now_IO]==0) //not blocked 
@@ -421,7 +461,7 @@ int main(int argc, char **argv)
                 if(block_time[run_now_IO]!=0) //had been blocked but not blocked anymore
                 {
 
-                    appendR(headR,headIO->dataIO);//append item from IO queue to ready queue 
+                    appendR(&headR,headIO->dataIO);//append item from IO queue to ready queue 
                     popIO(&headIO);//pop the item from the IO queue
                     dispatches[run_now_IO]=dispatches[run_now_IO]+1;   //passed from io to cpu
                     block[run_now_IO]=0;//process not blocked anymore
@@ -454,8 +494,8 @@ int main(int argc, char **argv)
                 check_run[run_now_cpu]=check_run[run_now_cpu]-1;
                 if(check_run[run_now_cpu]==0)
                 {
-                    //append from cpu queue to ready queue ???
-                    //pop from cpu queue ???
+                    appendR(&headR,headC->dataC);//append from cpu queue to ready queue 
+                    popC(&headC);//pop from cpu queue 
                 }
             }
         }
@@ -467,7 +507,7 @@ int main(int argc, char **argv)
             {
                 if(block_time[run_now_IO]!=0) //had been blocked but not blocked anymore
                 {
-                    appendR(headR,headIO->dataIO);//append item from IO queue to ready queue 
+                    appendR(&headR,headIO->dataIO);//append item from IO queue to ready queue 
                     popIO(&headIO);//pop the item from the IO queue
                     dispatches[run_now_IO]=dispatches[run_now_IO]+1; //passed from io to cpu
                     block[run_now_IO]=0; //process not blocked anymore
@@ -505,25 +545,27 @@ int main(int argc, char **argv)
     printf("CPU:\n");
     printf("Total time spent busy: %d\n",CPU_runtime);
     printf("Total time spent idle: %d\n",CPU_idle_time);
-    float utCPU=CPU_runtime/system_clock_time;//nn.nn
-    printf("CPU utilization:%f\n",utCPU);
-    printf("Number of dispatches:%d\n",CPU_dispatch)//CPU dispatchname??
-    float thCPU= //Overall throughput = number of processes / total time
-    printf("Overall throughput:%d\n",)//need value
+    double a=CPU_runtime,b=system_clock_time;
+    double c=a/b;
+    printf("CPU utilization:%.2f\n",c);
+    printf("Number of dispatches:%d\n",CPU_dispatch)//CPU dispatchname
+    a = CPU_dispatch;
+    c=a/b; //Overall throughput = number of processes / total time
+    printf("Overall throughput:%.2f\n"c);
     
     printf("\n");//blank line for IO status
     
     printf("I/O device:\n");
     printf("Total time spent busy: %d\n",IO_runtime);
     printf("Total time spent idle: %d\n",IO_idle_time);
-    float utIO=(IO_runtime(float))/system_clock_time;//nn.nn
-    printf("I/O device utilization: %f\n",utIO);
-    printf("Number of dispatches:%d\n",IO_dispatch)//CPU dispatchname??
-    float thIO= //Overall throughput = number of processes / total time
-    printf("Overall throughput:%d\n",)//need value
-    //utCPU, utIO, thCPU,thIO all are float nn.nn
-    //all interger or float digits are italics
-    
+    a=IO_runtime;
+    c=a/b;
+    printf("I/O device utilization: %.2f\n",c);
+    printf("Number of dispatches:%d\n",IO_dispatch);//CPU dispatchname
+    a=IO_dispatch;
+    c=a/b;//Overall throughput = number of processes / total time
+    printf("Overall throughput:%.2f\n",c);//need value
+  
 
 }
 
