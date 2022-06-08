@@ -535,7 +535,7 @@ int main(int argc, char **argv)
 
     printf("Processes:\n");
     printf("Name    CPU time    When done  Dispatches  Block for I/O    I/O time\n");
-    for (int v=0;v<i;v++)
+    for (int v=0;v<num;v++)
     {
         
         printf("%s  ",name_process[v]);
@@ -552,12 +552,12 @@ int main(int argc, char **argv)
     printf("Total time spent busy: %d\n",CPU_runtime);
     printf("Total time spent idle: %d\n",CPU_idle_time);
     double a=CPU_runtime,b=system_clock_time;
-    double c=a/b;
-    printf("CPU utilization:%.2f\n",c);
+    double d=a/b;
+    printf("CPU utilization:%.2f\n",d);
     printf("Number of dispatches:%d\n",CPU_dispatch)//CPU dispatchname
     a = CPU_dispatch;
-    c=a/b; //Overall throughput = number of processes / total time
-    printf("Overall throughput:%.2f\n"c);
+    d=a/b; //Overall throughput = number of processes / total time
+    printf("Overall throughput:%.2f\n",d);
     
     printf("\n");//blank line for IO status
     
@@ -565,12 +565,12 @@ int main(int argc, char **argv)
     printf("Total time spent busy: %d\n",IO_runtime);
     printf("Total time spent idle: %d\n",IO_idle_time);
     a=IO_runtime;
-    c=a/b;
-    printf("I/O device utilization: %.2f\n",c);
+    d=a/b;
+    printf("I/O device utilization: %.2f\n",d);
     printf("Number of dispatches:%d\n",IO_dispatch);//CPU dispatchname
     a=IO_dispatch;
-    c=a/b;//Overall throughput = number of processes / total time
-    printf("Overall throughput:%.2f\n",c);//need value
+    d=a/b;//Overall throughput = number of processes / total time
+    printf("Overall throughput:%.2f\n",d);//need value
   
 
 }
