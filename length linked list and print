@@ -1,0 +1,59 @@
+void Rprint(struct Readyqueue* n)//Print Readyqueue
+{
+    while (n != NULL) {
+        printf(" %d ", n->dataR);
+        n = n->next;
+    }
+}
+
+void CPUprint(struct CPUlist* n)//print CPUlist
+{
+    while (n != NULL) {
+        printf(" %d ", n->dataC);
+        n = n->next;
+    }
+}
+
+void IOprint(struct IOqueue* n)//print IOqueue
+{
+    while (n != NULL) {
+        printf(" %d ", n->dataIO);
+        n = n->next;
+    }
+}
+
+int getlengthR(struct Readyqueue* n)//get Readyqueue length
+{
+    int lengthR = 0;
+    while (n != NULL) {
+        lengthR+=1;
+        n = n->next;
+    }
+    
+    return lengthR;
+}
+
+int getlengthC(struct CPUlist* n)//get CPU length
+{
+    int lengthC = 0;
+    while (n != NULL) {
+        lengthC+=1;
+        n = n->next;
+    }
+    
+    return lengthC;
+}
+
+int getlengthIO(struct IOqueue* n)//get IO length
+{
+    int lengthIO = 0;
+    while (n != NULL) {
+        lengthIO+=1;
+        n = n->next;
+    }
+    
+    return lengthIO;
+}
+  
+  
+  
