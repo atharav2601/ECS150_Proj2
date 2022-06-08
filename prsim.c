@@ -20,9 +20,7 @@ struct CPUlist
 {
   int dataC; 
   struct CPUlist *next;
-}
-
- 
+};
 
 void appendR(struct Readyqueue** head, int newData)//to initialzie the ready queue, use for loop to add the process number one by one
 {
@@ -162,7 +160,8 @@ int main(int argc, char **argv)
     char c;
     int num = 0;
     //char *input = argv[1];
-
+    char input[] = *argv[1];
+    printf("%s",input);
     file_count=fopen(argv[2],"r");
     if (file_count == 0)
     {
@@ -302,7 +301,6 @@ int main(int argc, char **argv)
     }
     int track = 0;
     float random=0.00;
-    char input='f';
 
     //variables for processes
     int runtime[num]; //runtime for different processes 
@@ -372,7 +370,7 @@ int main(int argc, char **argv)
                     }
                     else if(check_run[track]==0)
                     {
-                        appendIO(&headIO,track)//append track value from cpu queue to IO queue
+                        appendIO(&headIO,track);//append track value from cpu queue to IO queue
                         popC(&headC);//pop first value of cpu queue
                         blocked_counter[track]=blocked_counter[track]+1;
                         preblock_run[track] = 0; //resetting the value in case the process gets blocked again
@@ -434,7 +432,7 @@ int main(int argc, char **argv)
             }
               
         }
-        //check if IO and CPU queue has values, if they both do
+        if((headC->dataC!=NULL) && (headIO->dataIO!=NULL))
         {
             run_now_cpu=headC->dataC;//get first index value in cpu queue here
             run_now_IO=headIO->dataIO;//get first index value of IO queue here
@@ -484,7 +482,7 @@ int main(int argc, char **argv)
         {
             CPU_runtime=CPU_runtime+1;
             IO_idle_time=IO_idle_time+1;
-            run_now_cpu=0;// get CPU queue's first value here
+            run_now_cpu=headC->dataC;// get CPU queue's first value here
             if(runtime[run_now_cpu]==time_process[run_now_cpu]-1)
             {
                 time_completed[run_now_cpu]=system_clock_time;
@@ -506,6 +504,7 @@ int main(int argc, char **argv)
         }
         //only IO queue has value
         {
+            run_now_IO=headIO->dataIO;
             IO_runtime=IO_runtime+1;
             CPU_idle_time=CPU_idle_time+1;
             if(check_block[run_now_IO]==0) //not blocked 
@@ -532,8 +531,10 @@ int main(int argc, char **argv)
         system_clock_time=system_clock_time+1;
         quantum=quantum+1;
     }
+    printf("Program output (to stdout):\n------------------\n");
+    /* header line */
+    printf("Processes:\n\n");
 
-    printf("Processes:\n");
     printf("Name    CPU time    When done  Dispatches  Block for I/O    I/O time\n");
     for (int v=0;v<num;v++)
     {
@@ -541,13 +542,11 @@ int main(int argc, char **argv)
         printf("%s  ",name_process[v]);
         printf("%d  %d  %d  %d  %d\n",runtime[v],time_completed[v],dispatches[v],blocked_counter[v],block_time[v]);
     }
-    printf("\n");//blank line for system
-    
+    printf("\n");//blank line for system  
     printf("system:\n");
     printf("The wall clock time at which the simulation finished: ");
     printf("%d\n",system_clock_time);
-    printf("\n");//blank line for CPU status
-    
+    printf("\n");//blank line for CPU status   
     printf("CPU:\n");
     printf("Total time spent busy: %d\n",CPU_runtime);
     printf("Total time spent idle: %d\n",CPU_idle_time);
@@ -557,10 +556,8 @@ int main(int argc, char **argv)
     printf("Number of dispatches:%d\n",CPU_dispatch);//CPU dispatchname
     a = CPU_dispatch;
     d=a/b; //Overall throughput = number of processes / total time
-    printf("Overall throughput:%.2f\n",d);
-    
-    printf("\n");//blank line for IO status
-    
+    printf("Overall throughput:%.2f\n",d);   
+    printf("\n");//blank line for IO status    
     printf("I/O device:\n");
     printf("Total time spent busy: %d\n",IO_runtime);
     printf("Total time spent idle: %d\n",IO_idle_time);
@@ -571,42 +568,4 @@ int main(int argc, char **argv)
     a=IO_dispatch;
     d=a/b;//Overall throughput = number of processes / total time
     printf("Overall throughput:%.2f\n",d);//need value
-  
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-//extra code
-
-/*check if ready queue has values in it
-            {
-                run_now=0;//put the ready queue value over here
-                block = Check_if_blocked(run_now, probability[run_now], time_process[run_now]);
-            }
-            //else
-            {
-                break;
-            }
-            if(block==1)
-            {
-                //append value from ready queue into IO queue over here
-                //pop the ready queue value over here
-            }
-            else
-            {
-                //append value of ready queue in CPU queue
-                //pop value from ready queue
-                break;
-            }  
-*/
