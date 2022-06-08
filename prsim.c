@@ -544,7 +544,7 @@ int main(int argc, char **argv)
     printf("\n");//blank line for system
     
     printf("system:\n");
-    printf("The wall clock time at which the simulation finished: ")
+    printf("The wall clock time at which the simulation finished: ");
     printf("%d\n",system_clock_time);
     printf("\n");//blank line for CPU status
     
@@ -554,7 +554,7 @@ int main(int argc, char **argv)
     double a=CPU_runtime,b=system_clock_time;
     double d=a/b;
     printf("CPU utilization:%.2f\n",d);
-    printf("Number of dispatches:%d\n",CPU_dispatch)//CPU dispatchname
+    printf("Number of dispatches:%d\n",CPU_dispatch);//CPU dispatchname
     a = CPU_dispatch;
     d=a/b; //Overall throughput = number of processes / total time
     printf("Overall throughput:%.2f\n",d);
